@@ -1,0 +1,61 @@
+-- Company Table
+CREATE TABLE companies (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+-- Warehouse Table
+CREATE TABLE warehouses (
+    id SERIAL PRIMARY KEY,
+    company_id INT REFERENCES companies(id),
+    name VARCHAR(255)
+);
+
+-- Product Table
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    sku VARCHAR(100) UNIQUE NOT NULL,
+    price DECIMAL(10,2)
+);
+
+-- Inventory Table
+CREATE TABLE inventory (
+    id SERIAL PRIMARY KEY,
+    product_id INT REFERENCES products(id),
+    warehouse_id INT REFERENCES warehouses(id),
+    quantity INT,
+    last_updated TIMESTAMP DEFAULT NOW(),
+    UNIQUE(product_id, warehouse_id)
+);
+
+-- Inventory Changes History
+CREATE TABLE inventory_changes (
+    id SERIAL PRIMARY KEY,
+    inventory_id INT REFERENCES inventory(id),
+    change INT, -- Positive or negative
+    reason VARCHAR(255),
+    changed_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Suppliers Table
+CREATE TABLE suppliers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    contact_email VARCHAR(255)
+);
+
+-- Product-Supplier Relationship
+CREATE TABLE product_suppliers (
+    product_id INT REFERENCES products(id),
+    supplier_id INT REFERENCES suppliers(id),
+    PRIMARY KEY(product_id, supplier_id)
+);
+
+-- Bundled Products
+CREATE TABLE product_bundles (
+    bundle_id INT REFERENCES products(id),
+    component_id INT REFERENCES products(id),
+    quantity INT DEFAULT 1,
+    PRIMARY KEY(bundle_id, component_id)
+);
