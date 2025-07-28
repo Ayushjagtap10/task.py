@@ -1,0 +1,48 @@
+ from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+# Sample inventory alert data
+inventory_alerts = [
+    {
+        "product_id": 123,
+        "product_name": "Widget A",
+        "sku": "WID-001",
+        "warehouse_id": 456,
+        "warehouse_name": "Main Warehouse",
+        "current_stock": 5,
+        "threshold": 20,
+        "days_until_stockout": 12,
+        "supplier": {
+            "id": 789,
+            "name": "Supplier Corp",
+            "contact_email": "orders@supplier.com"
+        }
+    }
+]
+
+# Route to get low-stock alerts
+@app.route('/api/alerts', methods=['GET'])
+def get_inventory_alerts():
+    try:
+        # Filter alerts if current stock is below threshold
+        alerts = [
+            alert for alert in inventory_alerts
+            if alert['current_stock'] < alert['threshold']
+        ]
+
+        # Construct final response
+        response = {
+            "alerts": alerts,
+            "total_alerts": len(alerts)
+        }
+
+        return jsonify(response), 200
+
+    except Exception as e:
+        # Catch and log any server-side errors
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
